@@ -3,6 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:p="http://www.springframework.org/schema/p"
     xsi:schemaLocation="http://www.springframework.org/schema/beans 
     http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context 
@@ -11,13 +12,13 @@
         http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd">                    
 
     <!-- spring扫描的包 -->
-   <context:component-scan base-package="com.service"></context:component-scan>
+    <context:component-scan base-package="com.service"></context:component-scan>
     <context:component-scan base-package="com.dao"></context:component-scan>
     <context:component-scan base-package="com.util"></context:component-scan>
     <context:component-scan base-package="com.controller"></context:component-scan>
     <context:component-scan base-package="com.aop"></context:component-scan>
     <context:component-scan base-package="com.webservice.impl"></context:component-scan>
-
+	<context:property-placeholder location="classpath:config.properties"/>
     <!-- DispatcherServlet不处理静态资源,交给服务器默认的servlet处理 -->
     <mvc:default-servlet-handler />
 
@@ -31,5 +32,47 @@
         <property name="prefix" value="/jsp/" />
         <!-- 后缀 -->
         <property name="suffix" value=".jsp" />
+    </bean>
+    <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close"
+          p:maxWait="5000"
+          p:removeAbandoned="true"
+          p:removeAbandonedTimeout="180"
+          p:connectionProperties="clientEncoding=UTF-8"
+          p:validationQuery="SELECT 1"
+          p:validationQueryTimeout="1"
+          p:validationInterval="30000"
+          p:testOnBorrow="false"
+          p:testOnReturn="false"
+          p:testWhileIdle="true"
+          p:timeBetweenEvictionRunsMillis="10000"
+          p:minEvictableIdleTimeMillis="60000"
+          p:numTestsPerEvictionRun="20"
+          p:logAbandoned="false"
+          p:jmxEnabled="true"
+          p:defaultAutoCommit="true"
+          p:driverClassName="${jdbc.driver}"
+          p:url="${jdbc.url}"
+          p:username="${jdbc.username}"
+          p:password="${jdbc.password}"
+          p:initialSize="100"
+          p:maxActive="500"
+          p:maxIdle="100"
+          p:minIdle="50"/>
+    
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" lazy-init="false">
+    	<property name="dataSource" ref="dataSource"></property>
+    	<property name="hibernateProperties">
+    		<props>
+    			<!-- <prop key="hibernate.dialect">${hibernate.dialect}</prop> -->
+    			<prop key="hibernate.autoReconnect">${hibernate.autoReconnect}</prop>
+    		</props>
+    	</property>
+    	<property name="configLocation" value="classpath:hibernate.cfg.xml"></property>
+    	
+    </bean>
+    
+   <!--  配置spring 申明事务 -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+    	<property name="sessionFactory" ref="sessionFactory"></property>
     </bean>
 </beans>
