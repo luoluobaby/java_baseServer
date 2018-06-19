@@ -31,7 +31,7 @@ public class DriveSimulatorControllerImpl implements DriveSimulatorController{
 		// TODO Auto-generated method stub	
 		CurrentUserInfoV inputAdditionV= new CurrentUserInfoV(simulatorId, train_unit_code, pupino, pupilName, cardNo, equipment_type);
 		if (null== additionService)
-			return "helloworld";
+			return "false,99,通讯凭证错误";
 		else
 			return additionService.login(inputAdditionV , userCode,password);
 	}
