@@ -1,10 +1,13 @@
 package com.service.model;
 
 import java.io.Serializable;
-
-import javax.annotation.Resource;
 import java.lang.reflect.ParameterizedType;
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
 import com.dao.BaseDaoI;
+import java.lang.reflect.Type;
 
 public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 	
@@ -22,7 +25,7 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 		// TODO Auto-generated method stub
 		if(null==ids||"".equals(ids))
 			return;
-		Class <TP> entityClass = (Class <TP>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];   
+		Class <TP> entityClass = (Class<TP>)getSuperClassGenricType(getClass(), 0);   
 		for(String id:ids.split(","))
 		{
 			
@@ -36,7 +39,7 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 		// TODO Auto-generated method stub
 		if(null==id||"".equals(id))
 			return null;
-		Class <TP> entityClass = (Class <TP>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		Class <TP> entityClass = (Class<TP>)getSuperClassGenricType(getClass(), 0);  
 		TP t=dao.get(entityClass, id);
 		return t;
 	}
@@ -53,4 +56,25 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 		
 	}
 	
+	@SuppressWarnings("unchecked")  
+    public static Class<Object> getSuperClassGenricType(final Class clazz, final int index) {  
+          
+        //返回表示此 Class 所表示的实体（类、接口、基本类型或 void）的直接超类的 Type。  
+        Type genType = clazz.getGenericSuperclass();  
+  
+        if (!(genType instanceof ParameterizedType)) {  
+           return Object.class;  
+        }  
+        //返回表示此类型实际类型参数的 Type 对象的数组。  
+        Type[] params = ((ParameterizedType) genType).getActualTypeArguments();  
+  
+        if (index >= params.length || index < 0) {  
+                     return Object.class;  
+        }  
+        if (!(params[index] instanceof Class)) {  
+              return Object.class;  
+        }  
+  
+        return (Class) params[index];  
+    }  
 }

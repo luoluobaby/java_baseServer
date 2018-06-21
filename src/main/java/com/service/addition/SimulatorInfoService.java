@@ -36,22 +36,10 @@ public class SimulatorInfoService {
 		simulatorInfoAdditionServiceImpl.update(addition);
 	}
 	
-	public List<SimulatorInfo> queryByGroup(String trainUnitCode,String equipmentType,short stat)
-	{
-		return simulatorInfoAdditionServiceImpl.queryByGroup(trainUnitCode, equipmentType, stat);
-	}
-	public List<SimulatorInfo> queryByGroup(short stat)
-	{
-		return simulatorInfoAdditionServiceImpl.queryByGroup( stat);
-	}
 	
-	public SimulatorInfo queryByGroup(String trainUnitCode,String equipmentType)
+	public SimulatorInfo queryByGroup(String trainUnitCode,String equipmentType ,short state)
 	{
-		return simulatorInfoAdditionServiceImpl.queryByGroup(trainUnitCode, equipmentType);
-	}
-	
-	public SimulatorInfo getByGroup(String trainUnitCode,String equipmentType) {
-		return simulatorInfoAdditionServiceImpl.getByGroup(trainUnitCode, equipmentType);
+		return simulatorInfoAdditionServiceImpl.queryByGroup(trainUnitCode, equipmentType , state);
 	}
 	
 	/***********************************下面是websocket调用的函数***********************************************/

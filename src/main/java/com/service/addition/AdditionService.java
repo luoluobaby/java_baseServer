@@ -1,12 +1,20 @@
 package com.service.addition;
 
+import java.io.IOException;
+
 import javax.annotation.Resource;
+
+import org.apache.commons.lang.ObjectUtils.Null;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
 import com.model.po.CurrentUserInfo;
 import com.model.po.SimulatorInfo;
 import com.model.vo.CurrentUserInfoV;
 import com.service.model.impl.CurrentUserInfoServiceImpl;
+import com.websocket.Machines;
+import com.websocket.SocketConstSendTextType;
+import com.websocket.SocketSendTextFormat;
 
 @Service("additionService")
 public class AdditionService {
@@ -37,33 +45,51 @@ public class AdditionService {
 		else
 		{
 			CurrentUserInfo outAddition=currentUserInfoAdditionServiceImpl.queryByKey(inputAdditionV.getSimulatorId());
-			if(null==outAddition)
-			{				
-				//系统分配机器
-				SimulatorInfo	simulatorInfoAddition=simulatorInfoService.getByGroup(
-							inputAdditionV.getTrainUnitCode(), inputAdditionV.getEquipmentType());
-				if(null==simulatorInfoAddition)
+			SimulatorInfo simulatorInfo = null;
+			//查询是否已经在线
+			if (null != outAddition) {
+				simulatorInfo = outAddition.getSimulatorInfo();
+			}
+			else
+			{
+				simulatorInfo=simulatorInfoService.queryByGroup(
+				inputAdditionV.getTrainUnitCode(), inputAdditionV.getEquipmentType() , (short)0);
+				if(null==simulatorInfo)
+				{
 					strback = BackString(false,1,"查询无此模拟器");
-				if (simulatorInfoAddition.getStat()==1) 
-					strback = BackString(false,2,"模拟器状态为非空闲");
-				else if( simulatorInfoAddition.getStat()==2 )
-					strback = BackString(false,3,"模拟器故障");
-				else {
-					inputAdditionV.setEquipmentId(simulatorInfoAddition.getEquipmentId());
+				}
+			}
+			if( null != simulatorInfo )
+			{
+				Machines machines = Machines.GetMachine(simulatorInfo.getEquipmentId());
+				if (null == machines) {
+					//发生错误
+					strback = BackString(false,1,"查询无此模拟器");
+				}
+				else
+				{
+					inputAdditionV.setEquipmentId(simulatorInfo.getEquipmentId());
 					inputAdditionV.setStat((byte)0);
 					String key= (String) currentUserInfoAdditionServiceImpl.insert(inputAdditionV);
 					if(null==key||"".equals(key))
 						strback = BackString(false,99,"通讯凭证错误");
 					else
 					{
-						simulatorInfoAddition.setStat((short)1);
-						simulatorInfoService.update(simulatorInfoAddition);
-						strback = BackString(true,0,"模拟器登入成功!编号："+simulatorInfoAddition.getEquipmentCode());
-					}					
+						simulatorInfo.setStat((short)1);
+						simulatorInfoService.update(simulatorInfo);
+						strback = BackString(true,0,"模拟器登入成功!编号："+simulatorInfo.getEquipmentCode());
+						//发送信息到该台模拟器。表明当前有用户登陆进来。
+						Gson gson = new Gson();
+						try {
+							machines.sendMessage( new SocketSendTextFormat<CurrentUserInfoV>(SocketConstSendTextType.LoginIn ,inputAdditionV).toString() );
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}		
 				}				
 			}			
-		}
-		
+		}		
 		return strback;
 	}
 	/**
@@ -88,12 +114,18 @@ public class AdditionService {
 			}
 			else
 			{
-				currentUserInfoAdditionV.getSimulatorInfo().setStat((short)0);
-				simulatorInfoService.update(currentUserInfoAdditionV.getSimulatorInfo());
+				//模拟器不退出，用户也不退出，通知机器上传训练记录，上传完成后当
+				Machines machines = Machines.GetMachine(currentUserInfoAdditionV.getSimulatorInfo().getEquipmentId());
+				if (null != machines) {
+					try {
+						machines.sendMessage(new SocketSendTextFormat<String>(SocketConstSendTextType.LoginOut,"Login out").toString());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				strback = BackString(true,0,"模拟器登退成功");
 			}
-			currentUserInfoAdditionV.setStat((byte)1);
-			currentUserInfoAdditionServiceImpl.update(currentUserInfoAdditionV);
-			strback = BackString(true,0,"模拟器登退成功");
 		}		
 		return strback;
 	}
@@ -139,4 +171,5 @@ public class AdditionService {
 		back+=(","+str);
 		return back;
 	}
+
 }

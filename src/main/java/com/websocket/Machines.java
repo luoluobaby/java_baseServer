@@ -34,6 +34,14 @@ public class Machines {
 	private Session session ;
 	
 	/**
+	 * 获取发送的session
+	 * @return
+	 */
+	public Session getSession(){
+		return this.session;
+	}
+	
+	/**
 	 * 查询机器是否存在的类
 	 */
 	private static SimulatorInfoService simulatorInfoService=(new ClassPathXmlApplicationContext("springmvc.xml")).getBean(SimulatorInfoService.class);
@@ -101,4 +109,31 @@ public class Machines {
 			}
 		}
 	}
+	/**
+	 * 根据机器序列号，查找机器列表
+	 * @param machineChip
+	 * @return
+	 */
+	public static Machines GetMachine( String machineChip )
+	{
+		Machines machines = null ;
+		if ( false == Machines.getHeartSet().isEmpty()) {
+			for (Machines m : Machines.getHeartSet()) {
+				if (m.machineChip.equals(machineChip)) {
+					machines = m;
+					break;
+				}
+			}
+		}
+		return machines;
+	}
+	
+	/**
+	 * 跟session发送消息
+	 * @param message
+	 * @throws IOException
+	 */
+	public void sendMessage(String message) throws IOException{
+        this.session.getBasicRemote().sendText(message);
+    }
 }
