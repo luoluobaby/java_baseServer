@@ -12,7 +12,7 @@ public class SimulatorInfoServiceImpl extends BaseServiceImpl<SimulatorInfo> {
 	
 	public SimulatorInfo queryByGroup(String trainUnitCode,String equipmentType) {		
 		SimulatorInfo addition=dao.get(
-				"from SimulatorInfo t where t.DriveTrainCompanyInfo.trainUnitCode = ? "
+				"from SimulatorInfo t where t.driveTrainCompanyInfo.trainUnitCode = ? "
 				+ "and t.equipmentType = ? ",new Object[]{trainUnitCode,equipmentType});
 		return addition;
 	}
@@ -20,7 +20,7 @@ public class SimulatorInfoServiceImpl extends BaseServiceImpl<SimulatorInfo> {
 	public SimulatorInfo queryByGroup(String trainUnitCode,String equipmentType,short stat) {
 		
 		SimulatorInfo addition= dao.get(
-				"from SimulatorInfo t where t.DriveTrainCompanyInfo.trainUnitCode = ? "
+				"from SimulatorInfo t where t.driveTrainCompanyInfo.trainUnitCode = ? "
 				+ "and t.equipmentType = ? and "
 				+ "t.stat = ? order by t.equipmentCode asc",new Object[]{trainUnitCode,equipmentType,stat});
 		return addition;

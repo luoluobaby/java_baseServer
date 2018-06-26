@@ -1,5 +1,7 @@
 package com.websocket;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -30,6 +32,7 @@ public class Machines {
 	
 	/**
 	 * 发送消息的session
+	 * 
 	 */
 	private Session session ;
 	
@@ -63,9 +66,11 @@ public class Machines {
 			
 			return ;
 		}
+		System.out.println("open "+machine);
 		IsExistAndRemoveCurr(this);
 		//说明当前机器已经上线，等待用户打卡签到
 		Machines.getHeartSet().add(this);
+		System.out.println("机器在线数量 "+Machines.getHeartSet().size());
 		simulatorInfoService.SetMachineOnLine(this.machineChip);
 	}
 	@OnError
@@ -82,6 +87,7 @@ public class Machines {
 	@OnMessage
 	public void OnMessage(String message,Session session) throws IOException
 	{
+		System.out.println("message");
 		//客户端发送过来的消息
 		//退出当前用户
 		if ("loginout".equals(message)) {
@@ -91,6 +97,7 @@ public class Machines {
 	
 	@OnClose
 	public void OnClose(Session session) {
+		System.out.println("close");
 		simulatorInfoService.SetMachineOffLine(this.machineChip);
 		Machines.getHeartSet().remove(this);  //从set中删除
 	}
@@ -117,6 +124,7 @@ public class Machines {
 	public static Machines GetMachine( String machineChip )
 	{
 		Machines machines = null ;
+		
 		if ( false == Machines.getHeartSet().isEmpty()) {
 			for (Machines m : Machines.getHeartSet()) {
 				if (m.machineChip.equals(machineChip)) {

@@ -10,7 +10,7 @@ import com.model.po.SimulatorInfo;
 import com.model.vo.CurrentUserInfoV;
 import com.service.model.BaseServiceImpl;
 import org.springframework.beans.BeanUtils;
-
+//相当于当前类中的TP指的都是CurrentUserInfo表
 @Service("currentUserInfoServiceImpl")
 public class CurrentUserInfoServiceImpl extends BaseServiceImpl<CurrentUserInfo> {
 	
