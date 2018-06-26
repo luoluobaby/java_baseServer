@@ -103,6 +103,7 @@ public class TrainingRecordService {
 	 */
 	private String CaculatePath(String simulateId)
 	{
+		//%08s 表示最小为8位，
 		String strUserId = String.format("%08s", simulateId) ;
 		String path = "F:/SaveRecords";			
 		int len = strUserId.length();

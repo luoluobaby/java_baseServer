@@ -10,14 +10,16 @@ import org.springframework.web.servlet.ModelAndView;
 import com.model.po.SimulatorInfo;
 import com.service.addition.SimulatorInfoService;
 import com.service.addition.TrainingRecordService;
-
+// 将action作为控制类
 @Controller
+//表示该类中所有的响应请求的方法都是以“/hello”作为父路径
 @RequestMapping("/hello")
+
 public class Hello {
 	
 	@Resource
 	private SimulatorInfoService simulatorInfoService ;
-	
+	//
 	@RequestMapping("eco")
 	@ResponseBody
     public String hello(){       

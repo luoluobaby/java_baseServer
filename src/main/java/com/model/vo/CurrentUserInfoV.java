@@ -17,15 +17,29 @@ public class CurrentUserInfoV {
 	 */
 	@SerializedName(value="EQUIPMENT_ID")
 	private String equipmentId;
-	
+	/**
+	 * 驾校编号
+	 */
 	@SerializedName(value="TRAIN_UNIT_CODE")
 	private String trainUnitCode;
+	/**
+	 * 学员身份证号
+	 */
 	@SerializedName(value="pupilNo")
 	private String pupilNo;
+	/**
+	 * 学员姓名
+	 */
 	@SerializedName(value="pupilName")
 	private String pupilName;
+	/**
+	 * 学员卡号
+	 */
 	@SerializedName(value="cardNo")
 	private String cardNo;
+	/**
+	 * 训练类型
+	 */
 	@SerializedName(value="EQUIPMENT_TYPE")
 	private String equipmentType;
 	
@@ -58,6 +72,7 @@ public class CurrentUserInfoV {
 		this.pupilName = pupilName;
 		this.cardNo = cardNo;
 		this.equipmentType = equipmentType;
+		this.dateTime=new Date();
 	}
 
 	public CurrentUserInfoV() {
@@ -67,52 +82,94 @@ public class CurrentUserInfoV {
 	public void setEquipmentId(String equipmentId) {
 		this.equipmentId = equipmentId;
 	}
+	/**
+	 * 获得驾校编号
+	 */
 	public String getTrainUnitCode() {
 		return trainUnitCode;
 	}
+	/**
+	 * 设置驾校编号
+	 */
 	public void setTrainUnitCode(String trainUnitCode) {
 		this.trainUnitCode = trainUnitCode;
 	}
+	/**
+	 * 获得学员身份证号
+	 */
 	public String getPupilNo() {
 		return pupilNo;
 	}
+	/**
+	 * 设置学员身份证号
+	 */
 	public void setPupilNo(String pupilNo) {
 		this.pupilNo = pupilNo;
 	}
+	/**
+	 * 获得学员姓名
+	 */
 	public String getPupilName() {
 		return pupilName;
 	}
+	/**
+	 * 设置学员姓名
+	 */
 	public void setPupilName(String pupilName) {
 		this.pupilName = pupilName;
 	}
+	/**
+	 * 获得学员卡号
+	 */
 	public String getCardNo() {
 		return cardNo;
 	}
+	/**
+	 * 设置学员卡号
+	 */
 	public void setCardNo(String cardNo) {
 		this.cardNo = cardNo;
 	}
+	/**
+	 * 获得训练流水号
+	 */
 	public String getSimulatorId() {
 		return simulatorId;
 	}
+	/**
+	 * 设置训练流水号
+	 */
 	public void setSimulatorId(String simulatorId) {
 		this.simulatorId = simulatorId;
 	}
-	
+	/**
+	 * 获得训练类型
+	 */
 	public String getEquipmentType() {
 		return equipmentType;
 	}
+	/**
+	 * 设置训练类型
+	 */
 	public void setEquipmentType(String equipmentType) {
 		this.equipmentType = equipmentType;
 	}
+	
 	public byte getStat() {
 		return stat;
 	}
 	public void setStat(byte stat) {
 		this.stat = stat;
 	}
+	/**
+	 * 获得训练时长
+	 */
 	public Date getDateTime() {
 		return dateTime;
 	}
+	/**
+	 * 设置训练时长
+	 */
 	public void setDateTime(Date dateTime) {
 		this.dateTime = dateTime;
 	}
