@@ -1,6 +1,7 @@
 package com.websocket;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * websocket发送数据格式
@@ -32,7 +33,7 @@ public class SocketSendTextFormat<T> {
 	}
 	@Override
 	public String toString() {
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().setDateFormat("MM/dd/yyyy HH:mm:ss").create();
 		return gson.toJson(this);
 	}
 	

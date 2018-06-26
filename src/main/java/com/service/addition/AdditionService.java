@@ -48,9 +48,11 @@ public class AdditionService {
 			// 根据训练流水号从CurrentUserInfo的表查找对应的用户信息      currentUserInfoAdditionServiceImpl 是表和表的操作的集合的对象
 			CurrentUserInfo outAddition=currentUserInfoAdditionServiceImpl.queryByKey(inputAdditionV.getSimulatorId());
 			SimulatorInfo simulatorInfo = null;
+			String key=null;
 			//当当前用户已经在线时， 查询当前用户的训练信息
 			if (null != outAddition) {
 				simulatorInfo = outAddition.getSimulatorInfo();
+				key = simulatorInfo.getEquipmentId(); 
 			}
 			else
 			{//当前用户还未在线时  从总的模拟器数据库中查找对应的模拟器信息
@@ -76,7 +78,9 @@ public class AdditionService {
 					//改变当前用户的状态
 					inputAdditionV.setStat((byte)0);
 					//将当前用户信息插入到对应的表中
-					String key= (String) currentUserInfoAdditionServiceImpl.insert(inputAdditionV);
+					if (null == key) {
+						key= (String) currentUserInfoAdditionServiceImpl.insert(inputAdditionV);
+					}
 					if(null==key||"".equals(key))
 						strback = BackString(false,99,"通讯凭证错误");
 					else
@@ -87,7 +91,6 @@ public class AdditionService {
 						simulatorInfoService.update(simulatorInfo);
 						strback = BackString(true,0,"模拟器登入成功!编号："+simulatorInfo.getEquipmentCode());
 						//发送信息到该台模拟器。表明当前有用户登陆进来。
-//						//Gson gson = new Gson();
 						try {
 							machines.sendMessage( new SocketSendTextFormat<CurrentUserInfoV>(SocketConstSendTextType.LoginIn ,inputAdditionV).toString() );
 						} catch (IOException e) {
@@ -142,14 +145,15 @@ public class AdditionService {
 	 * 正常退出，并删除
 	 * @param simulatorId
 	 */
-	public void logoutNormalDelete(String simulatorId) {
-		CurrentUserInfo currentUserInfoAdditionV=currentUserInfoAdditionServiceImpl.
-				queryByKey(simulatorId);
-		if(null==currentUserInfoAdditionV||
-			(byte)1!=currentUserInfoAdditionV.getStat())
-			return;
+	public void deleteUserAndReleaseSimulator(String simulatorId) {
+		CurrentUserInfo info = currentUserInfoAdditionServiceImpl.queryByKey(simulatorId);
+		if (null != info) {
+			if (null != info.getSimulatorInfo()) {
+				simulatorInfoService.SetMachineOnLine(info.getSimulatorInfo().getEquipmentId());
+			}
+			currentUserInfoAdditionServiceImpl.delete(simulatorId);
+		}
 		
-		currentUserInfoAdditionServiceImpl.delete(currentUserInfoAdditionV.getSimulatorId());
 	}
 	
 	/**

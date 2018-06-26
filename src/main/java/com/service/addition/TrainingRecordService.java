@@ -46,8 +46,20 @@ public class TrainingRecordService {
 	{
 		boolean b = additionService.CheckPasswd(userCode, password);
 		if (true == b) {
-			TrainingRecords recordv = new TrainingRecords(simulatorId , content, CaculatePath(simulatorId));
-			String temp = (String)trainingRecordsServiceImpl.insert(recordv);
+			TrainingRecords record = trainingRecordsServiceImpl.queryByKey(simulatorId);
+			if (null == record) {
+				record = new TrainingRecords(simulatorId , content, CaculatePath(simulatorId));
+			    trainingRecordsServiceImpl.insert(record);
+			}
+			else{
+				record.setContent(content);
+			}
+			TrainingRecords tempRecord = trainingRecordsServiceImpl.queryByKey(simulatorId);
+			b = (null!=tempRecord && tempRecord.getContent().equals(record.getContent()));
+			if (true == b) {
+				//删除当前在训练的记录
+				additionService.deleteUserAndReleaseSimulator(simulatorId);
+			}
 		}
 		return b;
 	}
@@ -104,7 +116,14 @@ public class TrainingRecordService {
 	private String CaculatePath(String simulateId)
 	{
 		//%08s 表示最小为8位，
-		String strUserId = String.format("%08s", simulateId) ;
+		int caculen = simulateId.length();
+		String strUserId="";
+		if (caculen < 5) {
+			int templen = 5-caculen;
+			for( int i=0;i<templen;i++ )
+				strUserId+="0";
+		}
+		strUserId += simulateId ;
 		String path = "F:/SaveRecords";			
 		int len = strUserId.length();
 		path+="/"+strUserId.substring(len-2,len-1)+"/"+strUserId.substring(len-3,len-2)+"/"+strUserId.substring(len-4,len-3)+"/"+strUserId.substring(len-5,len-4)+"/";
