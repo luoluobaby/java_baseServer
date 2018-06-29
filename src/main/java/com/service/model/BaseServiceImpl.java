@@ -7,8 +7,15 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import com.dao.BaseDaoI;
-import java.lang.reflect.Type;
+import com.exception.constraint.ValueNullException;
 
+import java.lang.reflect.Type;
+/**
+ * 数据库操作的封装基类
+ * @author Administrator
+ *
+ * @param <TP>
+ */
 public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 	
 	@Resource
@@ -17,21 +24,29 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 	@Override
 	public void update(TP t) {
 		// TODO Auto-generated method stub
-		dao.update(t);
+		if (null!=t) {
+			dao.update(t);
+		}
+		else {
+			new ValueNullException("更新类为空!");
+		}
 	}
 
 	@Override
-	public void delete(String ids) {
+	public void delete(String id) {
 		// TODO Auto-generated method stub
-		if(null==ids||"".equals(ids))
-			return;
-		Class <TP> entityClass = (Class<TP>)getSuperClassGenricType(getClass(), 0);   
+		if (null==id||"".equals(id)) {
+			new ValueNullException("id为空!");
+			return ;
+		}
+		Class <TP> entityClass = (Class<TP>)getSuperClassGenricType(getClass(), 0);
 		//基于‘，’将字符串分隔为多个字符串
-		for(String id:ids.split(","))
-		{
-			
-			TP info=dao.get(entityClass, id);
+		TP info=dao.get(entityClass , id);
+		if (null!=info) {
 			dao.delete(info);
+		}
+		else {
+			new ValueNullException("delete class is not found !");
 		}
 	}
 
@@ -50,7 +65,14 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 	@Override
 	public Serializable insert(TP t) {
 		// TODO Auto-generated method stub
-		return dao.save(t);
+		if (null != t) {
+			return dao.save(t);
+		}
+		else
+		{
+			new ValueNullException("inset class is null !");
+			return null;
+		}
 	}
 
 	@Override

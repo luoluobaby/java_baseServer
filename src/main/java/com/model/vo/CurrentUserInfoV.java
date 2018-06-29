@@ -66,12 +66,13 @@ public class CurrentUserInfoV {
 	public CurrentUserInfoV(String simulatorId, String trainUnitCode, String pupilNo,
 			String pupilName, String cardNo, String equipmentType) {
 		super();
-		this.simulatorId = simulatorId;
 		this.trainUnitCode = trainUnitCode;
 		this.pupilNo = pupilNo;
 		this.pupilName = pupilName;
 		this.cardNo = cardNo;
 		this.equipmentType = equipmentType;
+		//构造函数的时候就把驾校编号加到流水号里面去，让流水号变成唯一。
+		this.simulatorId =trainUnitCode+"_"+simulatorId;
 		this.dateTime=new Date();
 	}
 

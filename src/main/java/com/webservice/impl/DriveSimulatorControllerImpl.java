@@ -25,17 +25,15 @@ public class DriveSimulatorControllerImpl implements DriveSimulatorController{
 	 *  将传入的数据放入对象中，然后登陆。
 	 */
 	@Override
-	public String CheckInBy(@WebParam(name="userCode")String userCode, @WebParam(name="password")String password, 
+	public String CheckInBy(
+			@WebParam(name="userCode")String userCode, @WebParam(name="password")String password,
 			@WebParam(name="train_unit_code")String train_unit_code, @WebParam(name="pupino")String pupino,
 			@WebParam(name="pupilName")String pupilName,@WebParam(name="cardNo")String cardNo, 
 			@WebParam(name="simulatorId")String simulatorId, @WebParam(name="equipment_type")String equipment_type, 
 			@WebParam(name="time")String time) {
 		// 创建一个用户数据的对象	
 		CurrentUserInfoV inputAdditionV= new CurrentUserInfoV(simulatorId, train_unit_code, pupino, pupilName, cardNo, equipment_type);
-		if (null== additionService)
-			return "false,99,通讯凭证错误";
-		else
-			return additionService.login(inputAdditionV , userCode,password);
+		return additionService.login(inputAdditionV , userCode,password);
 	}
 	/**
 	 * 
@@ -44,11 +42,12 @@ public class DriveSimulatorControllerImpl implements DriveSimulatorController{
 	public String CheckOutBy(@WebParam(name="userCode")String userCode, @WebParam(name="password")String password, 
 			@WebParam(name="Train_Unit_Code")String Train_Unit_Code, @WebParam(name="pupino")String pupino, 
 			@WebParam(name="pupilName")String pupilName,@WebParam(name="cardNo")String cardNo,
-			@WebParam(name="simulatorId")String simulatorId) {
+			@WebParam(name="simulatorId")String simulatorId){
 		// TODO Auto-generated method stub
-		//学员签退		
-		
-		return additionService.logoutNormalNoDelete(simulatorId, userCode, password);
+		//学员签退
+		//流水号等于驾校编号+训练流水号 
+		simulatorId = Train_Unit_Code+"_"+simulatorId;
+		return additionService.LogOut(simulatorId, userCode, password);
 	}
 
 	@Override
@@ -56,7 +55,7 @@ public class DriveSimulatorControllerImpl implements DriveSimulatorController{
 			@WebParam(name="simulatorId")String simulatorId) {
 		// TODO Auto-generated method stub
 		String str ="";
-		if (false == additionService.CheckPasswd(userCode, password)) {
+		if (false == additionService.CheckPasswd(userCode, password)){
 			//验证失败
 			str="0,99,通讯凭证错误";
 		}

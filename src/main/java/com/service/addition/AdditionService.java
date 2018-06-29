@@ -7,6 +7,8 @@ import javax.annotation.Resource;
 import org.apache.commons.lang.ObjectUtils.Null;
 import org.springframework.stereotype.Service;
 
+import com.exception.constraint.ValueIllegalException;
+import com.exception.constraint.ValueNullException;
 //import com.google.gson.Gson;
 import com.model.po.CurrentUserInfo;
 import com.model.po.SimulatorInfo;
@@ -38,6 +40,12 @@ public class AdditionService {
 	public String login(CurrentUserInfoV inputAdditionV , String userCode , String password) {
 		
 		String strback = "";
+		//类构造不成功
+		if (null==inputAdditionV) {
+			new ValueNullException("currentUserInfoV=null");
+			strback = BackString(false,99,"通讯凭证错误");
+			return strback ;
+		}
 		//判断登陆的用户名和密码是否错误
 		if (false == CheckPasswd(userCode, password)) {
 			strback = BackString(false,99,"通讯凭证错误");
@@ -46,12 +54,12 @@ public class AdditionService {
 		{
 			//判断当前训练的流水号是否已经登录  CurrentUserInfo表中存储的是已经登录的用户的信息
 			// 根据训练流水号从CurrentUserInfo的表查找对应的用户信息      currentUserInfoAdditionServiceImpl 是表和表的操作的集合的对象
-			CurrentUserInfo outAddition=currentUserInfoAdditionServiceImpl.queryByKey(inputAdditionV.getSimulatorId());
+			CurrentUserInfo userInfo=currentUserInfoAdditionServiceImpl.queryByKey(inputAdditionV.getSimulatorId());
 			SimulatorInfo simulatorInfo = null;
 			String key=null;
 			//当当前用户已经在线时， 查询当前用户的训练信息
-			if (null != outAddition) {
-				simulatorInfo = outAddition.getSimulatorInfo();
+			if (null != userInfo) {
+				simulatorInfo = userInfo.getSimulatorInfo();
 				key = simulatorInfo.getEquipmentId(); 
 			}
 			else
@@ -69,6 +77,7 @@ public class AdditionService {
 				Machines machines = Machines.GetMachine(simulatorInfo.getEquipmentId());
 				if (null == machines) {
 					//发生错误
+					new ValueNullException("机器socket出现问题");
 					strback = BackString(false,1,"查询无此模拟器");
 				}
 				else
@@ -95,7 +104,8 @@ public class AdditionService {
 							machines.sendMessage( new SocketSendTextFormat<CurrentUserInfoV>(SocketConstSendTextType.LoginIn ,inputAdditionV).toString() );
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
-							e.printStackTrace();
+							new ValueIllegalException("机器socket出现问题");
+							strback = BackString(false,1,"查询无此模拟器");
 						}
 					}		
 				}				
@@ -104,10 +114,10 @@ public class AdditionService {
 		return strback;
 	}
 	/**
-	 * 正常退出，不删除，只标记
+	 * 正常签退，
 	 * @param simulatorId 训练记录流水id
 	 */
-	public String logoutNormalNoDelete(String simulatorId,String userCode, String password) {
+	public String LogOut(String simulatorId,String userCode, String password) {
 		
 		String strback = "";
 		if (false == CheckPasswd(userCode, password)) {
@@ -115,37 +125,41 @@ public class AdditionService {
 		}
 		else
 		{
-			CurrentUserInfo currentUserInfoAdditionV=currentUserInfoAdditionServiceImpl.
-					queryByKey(simulatorId);
-			if(null==currentUserInfoAdditionV)
+			//查找数据当前在线的人
+			CurrentUserInfo currUser=currentUserInfoAdditionServiceImpl.queryByKey(simulatorId);
+			if(null==currUser)
 				strback = BackString(false,1,"模拟器编号或流水号出错");
-			
-			if (null==currentUserInfoAdditionV.getSimulatorInfo() || (short)0==currentUserInfoAdditionV.getSimulatorInfo().getStat()) {
+
+			if (null==currUser.getSimulatorInfo() || (short)0==currUser.getSimulatorInfo().getStat()) {
 				strback = BackString(false,2,"模拟器并未处于使用状态");
 			}
 			else
 			{
-				//这是在一个列表中查找，而不是在表中查找
-				//模拟器不退出，用户也不退出，通知机器上传训练记录，上传完成后当
-				Machines machines = Machines.GetMachine(currentUserInfoAdditionV.getSimulatorInfo().getEquipmentId());
+				//在链表中查找当前机器
+				Machines machines = Machines.GetMachine(currUser.getSimulatorInfo().getEquipmentId());
 				if (null != machines) {
 					try {
 						machines.sendMessage(new SocketSendTextFormat<String>(SocketConstSendTextType.LoginOut,"Login out").toString());
+						strback = BackString(true,0,"模拟器登退成功");
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						new ValueIllegalException("发送数据到机器端失败");
+						strback = BackString(true,0,"模拟器并未处于使用状态");
 					}
 				}
-				strback = BackString(true,0,"模拟器登退成功");
+				else
+				{
+					strback = BackString(false,2,"模拟器并未处于使用状态");
+				}
 			}
 		}		
 		return strback;
 	}
 	/**
-	 * 正常退出，并删除
+	 * 删除当前用户，并且释放占用机器
 	 * @param simulatorId
 	 */
 	public void deleteUserAndReleaseSimulator(String simulatorId) {
+		//查找当前流水号占用的机器
 		CurrentUserInfo info = currentUserInfoAdditionServiceImpl.queryByKey(simulatorId);
 		if (null != info) {
 			if (null != info.getSimulatorInfo()) {
@@ -157,17 +171,21 @@ public class AdditionService {
 	}
 	
 	/**
-	 * 验证调用函数的用户名和密码 ， 由我们给对方
+	 * 验证调用函数的用户名和密码 ， 由我们给对方 , 指纹打卡厂家调用
 	 * @param userCode
 	 * @param password
 	 * @return
 	 */
 	public boolean CheckPasswd(String userCode , String password)
 	{
-		if ( this.userCode.equals(userCode) && this.password.equals(password) ) 
+		if ( this.userCode.equals(userCode) && this.password.equals(password)) 
 			return true;
 		else
+		{
+			//抛出异常
+			new ValueIllegalException("密码错误");
 			return false;
+		}			
 	}
 	
 	/**

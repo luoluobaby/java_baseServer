@@ -5,6 +5,8 @@ import java.io.Serializable;
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
+
+import com.exception.constraint.ValueIllegalException;
 import com.model.po.CurrentUserInfo;
 import com.model.po.SimulatorInfo;
 import com.model.vo.CurrentUserInfoV;
@@ -25,9 +27,16 @@ public class CurrentUserInfoServiceImpl extends BaseServiceImpl<CurrentUserInfo>
 	public Serializable insert(CurrentUserInfoV c) {
 		
 		SimulatorInfo simulatorInfo = simulatorInfoServiceImpl.queryByGroup(c.getTrainUnitCode(), c.getEquipmentType());
-		CurrentUserInfo curr = new CurrentUserInfo();
-		BeanUtils.copyProperties(c, curr);
-		curr.setSimulatorInfo(simulatorInfo);
-		return insert(curr);
+		if (null != simulatorInfo) {
+			CurrentUserInfo curr = new CurrentUserInfo();
+			BeanUtils.copyProperties(c, curr);
+			curr.setSimulatorInfo(simulatorInfo);
+			return insert(curr);
+		}
+		else
+		{
+			new ValueIllegalException("没有查找到当前用户的机器，插入不成功!");
+			return null;
+		}
 	}
 }

@@ -63,19 +63,17 @@ public class Machines {
 		
 		//先判断当前是否是一个有效的机器序列号
 		if (true == StringUtils.IsNullOrEmpty(machineChip) || false == simulatorInfoService.CheckIfMachineExist(machine) ) {
-			
 			return ;
 		}
 		System.out.println("open "+machine);
 		IsExistAndRemoveCurr(this);
 		//说明当前机器已经上线，等待用户打卡签到
 		Machines.getHeartSet().add(this);
-		System.out.println("机器在线数量 "+Machines.getHeartSet().size());
 		simulatorInfoService.SetMachineOnLine(this.machineChip);
 	}
 	@OnError
 	public void OnError(Session session,Throwable error) {
-		System.out.println(error.getMessage());
+		
 	}
 	
 	 /**
@@ -109,7 +107,7 @@ public class Machines {
 	private static void IsExistAndRemoveCurr(Machines curr) {
 		if (false ==Machines.getHeartSet().isEmpty()) {
 			for (Machines machines : Machines.getHeartSet()) {
-				if (machines.machineChip.equals(curr.machineChip)) {
+				if (machines.machineChip.equals(curr.machineChip)){
 					Machines.getHeartSet().remove(machines);
 					return;
 				}
