@@ -32,7 +32,7 @@ public class DriveSimulatorControllerImpl implements DriveSimulatorController{
 			@WebParam(name="simulatorId")String simulatorId, @WebParam(name="equipment_type")String equipment_type, 
 			@WebParam(name="time")String time) {
 		// 创建一个用户数据的对象	
-		CurrentUserInfoV inputAdditionV= new CurrentUserInfoV(simulatorId, train_unit_code, pupino, pupilName, cardNo, equipment_type);
+		CurrentUserInfoV inputAdditionV= new CurrentUserInfoV(simulatorId, train_unit_code, pupino, pupilName, cardNo, equipment_type,time);
 		return additionService.login(inputAdditionV , userCode,password);
 	}
 	/**

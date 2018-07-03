@@ -1,10 +1,7 @@
 package com.model.vo;
 
-import java.util.Date;
-
 import com.google.gson.annotations.SerializedName;
 import com.model.po.CurrentUserInfo;
-import com.model.po.SimulatorInfo;
 
 public class CurrentUserInfoV {
 	/**
@@ -15,12 +12,12 @@ public class CurrentUserInfoV {
 	/**
 	 * 模拟器序列号
 	 */
-	@SerializedName(value="EQUIPMENT_ID")
+	@SerializedName(value="equipmentId")
 	private String equipmentId;
 	/**
 	 * 驾校编号
 	 */
-	@SerializedName(value="TRAIN_UNIT_CODE")
+	@SerializedName(value="trainUnitCode")
 	private String trainUnitCode;
 	/**
 	 * 学员身份证号
@@ -40,13 +37,15 @@ public class CurrentUserInfoV {
 	/**
 	 * 训练类型
 	 */
-	@SerializedName(value="EQUIPMENT_TYPE")
+	@SerializedName(value="equipmentType")
 	private String equipmentType;
 	
-	@SerializedName(value="STAT")
+	@SerializedName(value="stat")
 	private byte stat;
-	@SerializedName(value="DateTime")
-	private Date dateTime;
+	
+	@SerializedName(value="time")
+	private float time;
+	
 	public String getEquipmentId() {
 		return equipmentId;
 	}
@@ -64,7 +63,7 @@ public class CurrentUserInfoV {
 	 * @param dateTime
 	 */
 	public CurrentUserInfoV(String simulatorId, String trainUnitCode, String pupilNo,
-			String pupilName, String cardNo, String equipmentType) {
+			String pupilName, String cardNo, String equipmentType , String time) {
 		super();
 		this.trainUnitCode = trainUnitCode;
 		this.pupilNo = pupilNo;
@@ -73,9 +72,21 @@ public class CurrentUserInfoV {
 		this.equipmentType = equipmentType;
 		//构造函数的时候就把驾校编号加到流水号里面去，让流水号变成唯一。
 		this.simulatorId =trainUnitCode+"_"+simulatorId;
-		this.dateTime=new Date();
+		this.time=Float.parseFloat(time);
 	}
 
+	public CurrentUserInfoV(CurrentUserInfo info) {
+		super();
+		this.trainUnitCode = info.getTrainUnitCode() ;
+		this.pupilNo = info.getPupilNo();
+		this.pupilName = info.getPupilName();
+		this.cardNo = info.getCardNo();
+		this.equipmentType = info.getEquipmentType();
+		//构造函数的时候就把驾校编号加到流水号里面去，让流水号变成唯一。
+		this.simulatorId =info.getSimulatorId();
+		this.time=info.getTime();
+	}
+	
 	public CurrentUserInfoV() {
 		super();
 	}
@@ -162,22 +173,19 @@ public class CurrentUserInfoV {
 	public void setStat(byte stat) {
 		this.stat = stat;
 	}
-	/**
-	 * 获得训练时长
-	 */
-	public Date getDateTime() {
-		return dateTime;
+
+	public float getTime() {
+		return time;
 	}
-	/**
-	 * 设置训练时长
-	 */
-	public void setDateTime(Date dateTime) {
-		this.dateTime = dateTime;
+
+	public void setTime(float time) {
+		this.time = time;
 	}
+
 	@Override
 	public String toString() {
 		return "CurrentUserInfoAdditionV [simulatorId=" + simulatorId + ", equipmentId=" + equipmentId
 				+ ", trainUnitCode=" + trainUnitCode + ", pupilNo=" + pupilNo + ", pupilName=" + pupilName + ", cardNo="
-				+ cardNo + ", equipmentType=" + equipmentType + ", stat=" + stat + ", dateTime=" + dateTime + "]";
+				+ cardNo + ", equipmentType=" + equipmentType + ", stat=" + stat + ", time=" + time + "]";
 	}
 }

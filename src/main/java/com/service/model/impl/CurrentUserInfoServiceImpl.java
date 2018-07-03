@@ -20,7 +20,7 @@ public class CurrentUserInfoServiceImpl extends BaseServiceImpl<CurrentUserInfo>
 	private SimulatorInfoServiceImpl simulatorInfoServiceImpl;
 	
 	public CurrentUserInfo queryByEquipmentId(String equipmentId) {
-		CurrentUserInfo addition=dao.get("from CurrentUserInfo t where t.SimulatorInfo.equipmentId = ?", new String[]{equipmentId});
+		CurrentUserInfo addition=dao.get("from CurrentUserInfo t where t.simulatorInfo.equipmentId = ?", new String[]{equipmentId});
 		return addition;
 	}
 	

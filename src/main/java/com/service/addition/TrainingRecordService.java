@@ -187,7 +187,7 @@ public class TrainingRecordService {
 		strUserId += realSimulateId ;
 		String path = "/Dataroot/TrainRecords/";
 		if (true == MyDebug.currIsDebug) {
-			path = "F:/SaveRecords/";
+			path = "F://SaveRecords";
 		}			
 		path+=train_Unit_code;
 		int len = strUserId.length();

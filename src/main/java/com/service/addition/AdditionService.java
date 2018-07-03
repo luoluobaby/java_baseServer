@@ -100,12 +100,8 @@ public class AdditionService {
 						simulatorInfoService.update(simulatorInfo);
 						strback = BackString(true,0,"模拟器登入成功!编号："+simulatorInfo.getEquipmentCode());
 						//发送信息到该台模拟器。表明当前有用户登陆进来。
-						try {
-							machines.sendMessage( new SocketSendTextFormat<CurrentUserInfoV>(SocketConstSendTextType.LoginIn ,inputAdditionV).toString() );
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							new ValueIllegalException("机器socket出现问题");
-							strback = BackString(false,1,"查询无此模拟器");
+						if (false == SendLoginInMessage(inputAdditionV, machines)) {
+							strback = BackString(false,99,"查询无此模拟器");
 						}
 					}		
 				}				
@@ -113,6 +109,35 @@ public class AdditionService {
 		}		
 		return strback;
 	}
+	/**
+	 * 发送登录消息给模拟器
+	 * @param info
+	 * @param machines
+	 * @return
+	 */
+	public boolean SendLoginInMessage(CurrentUserInfoV info , Machines machines)
+	{
+		boolean b=false;
+		try {
+			machines.sendMessage( new SocketSendTextFormat<CurrentUserInfoV>(SocketConstSendTextType.LoginIn ,info).toString() );
+			b = true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			new ValueIllegalException("机器socket出现问题");
+		}
+		return b;
+	}
+	
+	/**
+	 * 查找电路板的机器号
+	 * @param chipId
+	 * @return
+	 */
+	public CurrentUserInfo queryByEquipmentId(String chipId)
+	{
+		return currentUserInfoAdditionServiceImpl.queryByEquipmentId(chipId);
+	}
+	
 	/**
 	 * 正常签退，
 	 * @param simulatorId 训练记录流水id
