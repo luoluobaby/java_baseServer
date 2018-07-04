@@ -1,7 +1,5 @@
 package com.websocket;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -11,11 +9,15 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.model.po.CurrentUserInfo;
+import com.model.vo.CurrentUserInfoV;
+import com.service.addition.AdditionService;
 import com.service.addition.SimulatorInfoService;
 import com.util.StringUtils;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import javax.sound.midi.MidiDevice.Info;
 import javax.websocket.OnClose;
 
 @ServerEndpoint("/machine/{machine}")
@@ -50,6 +52,12 @@ public class Machines {
 	private static SimulatorInfoService simulatorInfoService=(new ClassPathXmlApplicationContext("springmvc.xml")).getBean(SimulatorInfoService.class);
 	
 	/**
+	 * 在线用户查询类
+	 */
+	private static AdditionService addtionService = (new ClassPathXmlApplicationContext("springmvc.xml")).getBean(AdditionService.class);;
+	
+	
+	/**
 	 * 统一控制所有机器的信息管理,有哪个机器链接进来了！
 	 * @param machine
 	 * @param session
@@ -63,19 +71,30 @@ public class Machines {
 		
 		//先判断当前是否是一个有效的机器序列号
 		if (true == StringUtils.IsNullOrEmpty(machineChip) || false == simulatorInfoService.CheckIfMachineExist(machine) ) {
-			
 			return ;
 		}
 		System.out.println("open "+machine);
 		IsExistAndRemoveCurr(this);
 		//说明当前机器已经上线，等待用户打卡签到
 		Machines.getHeartSet().add(this);
-		System.out.println("机器在线数量 "+Machines.getHeartSet().size());
-		simulatorInfoService.SetMachineOnLine(this.machineChip);
+		//开机判断当前是否还有用户占用该机器，则应该让用户继续占用
+		CurrentUserInfo info= null; 
+		if (null != addtionService) {
+			info = addtionService.queryByEquipmentId(machineChip);
+		}
+		if (null != info) 
+		{
+			CurrentUserInfoV infoV = new CurrentUserInfoV(info);
+			addtionService.SendLoginInMessage(infoV, this);
+			simulatorInfoService.SetMachineBusy(this.machineChip);
+		}
+		else
+			simulatorInfoService.SetMachineOnLine(this.machineChip);
 	}
 	@OnError
 	public void OnError(Session session,Throwable error) {
-		System.out.println(error.getMessage());
+		//断开
+		System.out.println("错误断开");
 	}
 	
 	 /**
@@ -87,17 +106,13 @@ public class Machines {
 	@OnMessage
 	public void OnMessage(String message,Session session) throws IOException
 	{
-		System.out.println("message");
-		//客户端发送过来的消息
-		//退出当前用户
-		if ("loginout".equals(message)) {
-			simulatorInfoService.SetMachineOnLine(this.machineChip);			
-		}
 	}
 	
 	@OnClose
 	public void OnClose(Session session) {
-		System.out.println("close");
+		//判断一下是否为异常退出
+		
+		//断开连接
 		simulatorInfoService.SetMachineOffLine(this.machineChip);
 		Machines.getHeartSet().remove(this);  //从set中删除
 	}
@@ -109,7 +124,7 @@ public class Machines {
 	private static void IsExistAndRemoveCurr(Machines curr) {
 		if (false ==Machines.getHeartSet().isEmpty()) {
 			for (Machines machines : Machines.getHeartSet()) {
-				if (machines.machineChip.equals(curr.machineChip)) {
+				if (machines.machineChip.equals(curr.machineChip)){
 					Machines.getHeartSet().remove(machines);
 					return;
 				}

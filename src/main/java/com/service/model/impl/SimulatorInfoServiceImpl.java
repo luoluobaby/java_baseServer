@@ -9,7 +9,12 @@ import com.util.StringUtils;
 @Service("simulatorInfoAdditionServiceImpl")
 public class SimulatorInfoServiceImpl extends BaseServiceImpl<SimulatorInfo> {
 	
-	
+	/**
+	 * 查找机器
+	 * @param trainUnitCode
+	 * @param equipmentType
+	 * @return
+	 */
 	public SimulatorInfo queryByGroup(String trainUnitCode,String equipmentType) {		
 		SimulatorInfo addition=dao.get(
 				"from SimulatorInfo t where t.driveTrainCompanyInfo.trainUnitCode = ? "
@@ -17,6 +22,13 @@ public class SimulatorInfoServiceImpl extends BaseServiceImpl<SimulatorInfo> {
 		return addition;
 	}
 	
+	/**
+	 * 查找机器
+	 * @param trainUnitCode
+	 * @param equipmentType
+	 * @param stat
+	 * @return
+	 */
 	public SimulatorInfo queryByGroup(String trainUnitCode,String equipmentType,short stat) {
 		
 		SimulatorInfo addition= dao.get(
