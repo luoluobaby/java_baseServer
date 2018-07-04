@@ -21,8 +21,7 @@
    
   	<jaxws:endpoint id="simulatorcontroller"
                   implementor="com.webservice.impl.DriveSimulatorControllerImpl"
-                  address="/simulatorcontroller"></jaxws:endpoint>
- 
+                  address="/simulatorcontroller"></jaxws:endpoint> 
     <jaxws:endpoint
                   id="upLoadcontroller"
                   implementor="com.webservice.impl.UpLoadControllerImpl"

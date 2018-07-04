@@ -8,7 +8,7 @@
   <display-name>Archetype Created Web Application</display-name>
   <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:applicationContext.xml,classpath:serviceconfig.xml</param-value>
+        <param-value>classpath:applicationContext.xml</param-value>
     </context-param>
   	<filter> 
 	    <filter-name>Spring character encoding filter</filter-name> 
@@ -47,7 +47,8 @@
     <servlet>
       <servlet-name>CXFServlet</servlet-name>
       <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
-      <load-on-startup>1</load-on-startup>
+      
+      <load-on-startup>2</load-on-startup>
     </servlet>
       <servlet-mapping>
       <servlet-name>CXFServlet</servlet-name>
