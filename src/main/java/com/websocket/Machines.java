@@ -13,6 +13,7 @@ import com.model.po.CurrentUserInfo;
 import com.model.vo.CurrentUserInfoV;
 import com.service.addition.AdditionService;
 import com.service.addition.SimulatorInfoService;
+import com.service.util.ApplicationContextUtil;
 import com.util.StringUtils;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -49,14 +50,26 @@ public class Machines {
 	/**
 	 * 查询机器是否存在的类
 	 */
-	private static SimulatorInfoService simulatorInfoService=(new ClassPathXmlApplicationContext("springmvc.xml")).getBean(SimulatorInfoService.class);
-	
+//	private static SimulatorInfoService simulatorInfoService=(new ClassPathXmlApplicationContext("springmvc.xml")).getBean(SimulatorInfoService.class);
+	private static SimulatorInfoService _simulatorInfoService=null;
+	private static SimulatorInfoService getSimulatorInfoService()
+	{
+		if (null == _simulatorInfoService) {
+			_simulatorInfoService =(SimulatorInfoService) ApplicationContextUtil.static_content.getBean(SimulatorInfoService.class);
+		}
+		return _simulatorInfoService;
+	}
 	/**
 	 * 在线用户查询类
 	 */
-	private static AdditionService addtionService = (new ClassPathXmlApplicationContext("springmvc.xml")).getBean(AdditionService.class);;
-	
-	
+//	private static AdditionService addtionService = (new ClassPathXmlApplicationContext("springmvc.xml")).getBean(AdditionService.class);;
+	private static AdditionService _addtionService=null;
+	private AdditionService getAddtionService(){
+		if (null == _addtionService) {
+			_addtionService =(AdditionService) ApplicationContextUtil.static_content.getBean(AdditionService.class);
+		}
+		return _addtionService;
+	}
 	/**
 	 * 统一控制所有机器的信息管理,有哪个机器链接进来了！
 	 * @param machine
@@ -70,7 +83,7 @@ public class Machines {
 		this.machineChip = machine;
 		
 		//先判断当前是否是一个有效的机器序列号
-		if (true == StringUtils.IsNullOrEmpty(machineChip) || false == simulatorInfoService.CheckIfMachineExist(machine) ) {
+		if (true == StringUtils.IsNullOrEmpty(machineChip) || false == getSimulatorInfoService().CheckIfMachineExist(machine) ) {
 			return ;
 		}
 		System.out.println("open "+machine);
@@ -79,17 +92,17 @@ public class Machines {
 		Machines.getHeartSet().add(this);
 		//开机判断当前是否还有用户占用该机器，则应该让用户继续占用
 		CurrentUserInfo info= null; 
-		if (null != addtionService) {
-			info = addtionService.queryByEquipmentId(machineChip);
+		if (null != getAddtionService()) {
+			info = getAddtionService().queryByEquipmentId(machineChip);
 		}
 		if (null != info) 
 		{
 			CurrentUserInfoV infoV = new CurrentUserInfoV(info);
-			addtionService.SendLoginInMessage(infoV, this);
-			simulatorInfoService.SetMachineBusy(this.machineChip);
+			getAddtionService().SendLoginInMessage(infoV, this);
+			getSimulatorInfoService().SetMachineBusy(this.machineChip);
 		}
 		else
-			simulatorInfoService.SetMachineOnLine(this.machineChip);
+			getSimulatorInfoService().SetMachineOnLine(this.machineChip);
 	}
 	@OnError
 	public void OnError(Session session,Throwable error) {
@@ -113,7 +126,7 @@ public class Machines {
 		//判断一下是否为异常退出
 		
 		//断开连接
-		simulatorInfoService.SetMachineOffLine(this.machineChip);
+		getSimulatorInfoService().SetMachineOffLine(this.machineChip);
 		Machines.getHeartSet().remove(this);  //从set中删除
 	}
 	/**

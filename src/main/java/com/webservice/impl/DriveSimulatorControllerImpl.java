@@ -1,5 +1,7 @@
 package com.webservice.impl;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
@@ -8,19 +10,37 @@ import com.model.vo.CurrentUserInfoV;
 import com.service.addition.AdditionService;
 import com.service.addition.TrainingRecordService;
 import com.webservice.DriveSimulatorController;
+import com.service.util.ApplicationContextUtil;
 
 @WebService(endpointInterface="com.webservice.DriveSimulatorController",serviceName="simulatorcontroller")
 public class DriveSimulatorControllerImpl implements DriveSimulatorController{
-
+	
 	/**
 	 * 
 	 */
-	private AdditionService additionService =(new ClassPathXmlApplicationContext("springmvc.xml")).getBean(AdditionService.class);
-
+	private AdditionService additionService =null;
+	
+	private AdditionService getAddtionService(){
+		if (null == additionService) {
+			additionService =(AdditionService) ApplicationContextUtil.static_content.getBean(AdditionService.class);
+		}
+		return additionService;
+	}
+	
 	/**
 	 * 训练内容
 	 */
-	private TrainingRecordService trainRecording=(new ClassPathXmlApplicationContext("springmvc.xml")).getBean(TrainingRecordService.class);
+//	private TrainingRecordService trainRecording=(new ClassPathXmlApplicationContext("springmvc.xml")).getBean(TrainingRecordService.class);
+	private TrainingRecordService trainRecording=null;
+	
+	private TrainingRecordService getTrainingRecordService()
+	{
+		if (null == trainRecording) {
+			trainRecording=(TrainingRecordService)ApplicationContextUtil.static_content.getBean(TrainingRecordService.class);
+		}
+		return trainRecording;
+	}
+	
 	/**
 	 *  将传入的数据放入对象中，然后登陆。
 	 */
@@ -31,9 +51,9 @@ public class DriveSimulatorControllerImpl implements DriveSimulatorController{
 			@WebParam(name="pupilName")String pupilName,@WebParam(name="cardNo")String cardNo, 
 			@WebParam(name="simulatorId")String simulatorId, @WebParam(name="equipment_type")String equipment_type, 
 			@WebParam(name="time")String time) {
-		// 创建一个用户数据的对象	
+		// 创建一个用户数据的对象
 		CurrentUserInfoV inputAdditionV= new CurrentUserInfoV(simulatorId, train_unit_code, pupino, pupilName, cardNo, equipment_type,time);
-		return additionService.login(inputAdditionV , userCode,password);
+		return getAddtionService().login(inputAdditionV , userCode,password);
 	}
 	/**
 	 * 
@@ -47,7 +67,7 @@ public class DriveSimulatorControllerImpl implements DriveSimulatorController{
 		//学员签退
 		//流水号等于驾校编号+训练流水号 
 		simulatorId = Train_Unit_Code+"_"+simulatorId;
-		return additionService.LogOut(simulatorId, userCode, password);
+		return getAddtionService().LogOut(simulatorId, userCode, password);
 	}
 
 	@Override
@@ -55,13 +75,13 @@ public class DriveSimulatorControllerImpl implements DriveSimulatorController{
 			@WebParam(name="simulatorId")String simulatorId) {
 		// TODO Auto-generated method stub
 		String str ="";
-		if (false == additionService.CheckPasswd(userCode, password)){
+		if (false == getAddtionService().CheckPasswd(userCode, password)){
 			//验证失败
 			str="0,99,通讯凭证错误";
 		}
 		else
 		{
-			str = trainRecording.GetTrainRecord(simulatorId);
+			str = getTrainingRecordService().GetTrainRecord(simulatorId);
 		}
 		return str;
 	}

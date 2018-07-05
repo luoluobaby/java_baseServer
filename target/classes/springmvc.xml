@@ -79,6 +79,9 @@
     <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
     	<property name="sessionFactory" ref="sessionFactory"></property>
     </bean>
+        
+    <bean id="applicationContextUtil" class="com.service.util.ApplicationContextUtil"></bean> 
+        
      <!-- 配置事务属性 -->
     <tx:advice id="txAdvice" transaction-manager="transactionManager">
     	<tx:attributes>

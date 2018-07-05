@@ -23,8 +23,11 @@ public class AdditionService {
 	
 	private final String userCode ="moni";
 	
-	private final String password="123";
+	private final String password="a75gd4e";
 	
+	private final String my_password= "Moni-Client+4000565758";
+	
+	private final String my_client = "moni";
 	@Resource
 	private CurrentUserInfoServiceImpl currentUserInfoAdditionServiceImpl;
 	@Resource
@@ -211,6 +214,17 @@ public class AdditionService {
 			new ValueIllegalException("密码错误");
 			return false;
 		}			
+	}
+	
+	/**
+	 * 验证身份证
+	 * @param userCode
+	 * @param password
+	 * @return
+	 */
+	public boolean CheckPasswdByMySelf( String userCode , String password )
+	{
+		return my_client.equals(userCode)&&my_password.equals(password);
 	}
 	
 	/**

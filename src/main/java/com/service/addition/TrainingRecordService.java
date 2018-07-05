@@ -37,7 +37,7 @@ public class TrainingRecordService {
 	 */
 	public boolean SaveImage(String userCode ,String password, String simulatorId , byte[] imageData)
 	{
-		boolean b = additionService.CheckPasswd(userCode, password);
+		boolean b = additionService.CheckPasswdByMySelf(userCode, password);
 		if (true == b) {
 			String path  = CaculatePath(simulatorId);
 			//图片保存名字
@@ -58,7 +58,7 @@ public class TrainingRecordService {
      */
 	public boolean SaveTrainingData(String userCode ,String password,String simulatorId , String content)
 	{
-		boolean b = additionService.CheckPasswd(userCode, password);
+		boolean b = additionService.CheckPasswdByMySelf(userCode, password);
 		if (true == b) {
 			/**
 			 *检测一下是否已经上传过记录
