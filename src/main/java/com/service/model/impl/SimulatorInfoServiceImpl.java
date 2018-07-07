@@ -29,12 +29,12 @@ public class SimulatorInfoServiceImpl extends BaseServiceImpl<SimulatorInfo> {
 	 * @param stat
 	 * @return
 	 */
-	public SimulatorInfo queryByGroup(String trainUnitCode,String equipmentType,short stat) {
+	public SimulatorInfo queryByGroup(String trainUnitCode,short stat) {
 		
 		SimulatorInfo addition= dao.get(
 				"from SimulatorInfo t where t.driveTrainCompanyInfo.trainUnitCode = ? "
-				+ "and t.equipmentType = ? and "
-				+ "t.stat = ? order by t.equipmentCode asc",new Object[]{trainUnitCode,equipmentType,stat});
+				+ "and "
+				+ "t.stat = ? order by t.equipmentCode asc",new Object[]{trainUnitCode,stat});
 		return addition;
 	}
 }

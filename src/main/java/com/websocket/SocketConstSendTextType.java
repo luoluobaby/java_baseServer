@@ -17,6 +17,7 @@ public class SocketConstSendTextType {
 	/**
 	 *上传数据
 	 */
-	public final static int UploadData=3;
+	public final static int NoFindMachine=3;
+	
 	
 }

@@ -84,6 +84,7 @@ public class Machines {
 		
 		//先判断当前是否是一个有效的机器序列号
 		if (true == StringUtils.IsNullOrEmpty(machineChip) || false == getSimulatorInfoService().CheckIfMachineExist(machine) ) {
+			sendMessage(new SocketSendTextFormat<String>(SocketConstSendTextType.NoFindMachine,"have find no machine").toString());
 			return ;
 		}
 		System.out.println("open "+machine);

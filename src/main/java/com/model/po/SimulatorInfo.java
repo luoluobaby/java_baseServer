@@ -1,5 +1,5 @@
 package com.model.po;
-// Generated 2018-7-4 14:49:56 by Hibernate Tools 3.5.0.Final
+// Generated 2018-7-6 14:29:52 by Hibernate Tools 3.5.0.Final
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,12 +32,11 @@ public class SimulatorInfo implements java.io.Serializable {
 	}
 
 	public SimulatorInfo(String equipmentId, DriveTrainCompanyInfo driveTrainCompanyInfo, String equipmentCode,
-			short stat, String lastUser, String equipmentType) {
+			short stat, String equipmentType) {
 		this.equipmentId = equipmentId;
 		this.driveTrainCompanyInfo = driveTrainCompanyInfo;
 		this.equipmentCode = equipmentCode;
 		this.stat = stat;
-		this.lastUser = lastUser;
 		this.equipmentType = equipmentType;
 	}
 
@@ -93,7 +92,7 @@ public class SimulatorInfo implements java.io.Serializable {
 		this.stat = stat;
 	}
 
-	@Column(name = "LAST_USER", nullable = false, length = 64)
+	@Column(name = "LAST_USER", length = 64)
 	public String getLastUser() {
 		return this.lastUser;
 	}

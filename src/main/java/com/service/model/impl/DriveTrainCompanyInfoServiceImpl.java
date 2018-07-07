@@ -20,4 +20,17 @@ public class DriveTrainCompanyInfoServiceImpl extends BaseServiceImpl<DriveTrain
 		return addition;
 	}
 	
+	/**
+	 * 根据驾校的名称查找驾校
+	 * @param name
+	 * @return
+	 */
+	public DriveTrainCompanyInfo queryByCompanyName(String name)
+	{
+		if (null == name || "".equals(name))
+			return null;
+		DriveTrainCompanyInfo info = dao.get("from DriveTrainCompanyInfo d where "
+				+ "d.name = ?", new Object[]{name});
+		return info ;
+	}
 }
