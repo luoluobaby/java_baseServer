@@ -10,7 +10,10 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.Factory;
 import org.apache.xml.resolver.helpers.Debug;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.exception.constraint.ValueIllegalException;
@@ -29,6 +32,7 @@ public class TrainingRecordService {
 	@Resource
 	private AdditionService additionService ;
 	
+	protected Logger logger=LoggerFactory.getLogger(TrainingRecordService.class);
 	/**
 	 * 查找当前流水号，并且保存训练图片
 	 * @param simulatorId训练流水号
@@ -37,6 +41,7 @@ public class TrainingRecordService {
 	 */
 	public boolean SaveImage(String userCode ,String password, String simulatorId , byte[] imageData)
 	{
+		
 		boolean b = additionService.CheckPasswdByMySelf(userCode, password);
 		if (true == b) {
 			String path  = CaculatePath(simulatorId);
@@ -63,16 +68,22 @@ public class TrainingRecordService {
 			/**
 			 *检测一下是否已经上传过记录
 			 */
-			TrainingRecords record = trainingRecordsServiceImpl.queryByKey(simulatorId);
+			int index = simulatorId.indexOf('_');
+			if ( 1 >= index) {
+				logger.error("上传路径不合法");
+				return false;
+			}
+			String realSimulateId  = simulatorId.substring(index+1);
+			TrainingRecords record = trainingRecordsServiceImpl.queryByKey(realSimulateId);
 			if (null == record) {
-				record = new TrainingRecords(simulatorId , content, CaculatePath(simulatorId));
+				record = new TrainingRecords(realSimulateId , content, CaculatePath(simulatorId));
 			    trainingRecordsServiceImpl.insert(record);
 			}
 			else{
 				record.setContent(content);
 				trainingRecordsServiceImpl.update(record);
 			}
-			TrainingRecords tempRecord = trainingRecordsServiceImpl.queryByKey(simulatorId);
+			TrainingRecords tempRecord = trainingRecordsServiceImpl.queryByKey(realSimulateId);
 			b = (null!=tempRecord && tempRecord.getContent().equals(record.getContent()));
 			if (true == b) {
 				//删除当前在训练的记录
@@ -96,35 +107,34 @@ public class TrainingRecordService {
 		 }
 		 else
 		 {
-			 String images = GetImages(simulatorId) ;
+			 String images = GetImages(recordsV.getPicpath()) ;
 			 if (null==images) {
-				 new ValueIllegalException("图片上传不成功");
+				 logger.error("图片上传不成功");
 				 str = "0,2,训练内容未上传";
 			 }
 			 else
 				 str="1,D,"+recordsV.getContent()+","+images;			 
 		 }		
-		return null ;
+		return str ;
 	}
 	
-	private String GetImages( String simulatorId )
+	private String GetImages( String pathstr )
 	{
 		String back=null;
-		String path = CaculatePath(simulatorId);
-		if (null == path || "".equals(path)) {
+		if (null == pathstr || "".equals(pathstr)) {
 			return back ;
 		}
-		File pathFile = new File(path);
+		File pathFile = new File(pathstr);
 		File[] fileList = pathFile.listFiles();
 		if (null== fileList || 3>fileList.length) {
 			return back ;
 		}
-		back=ImageUrl(simulatorId, fileList[0].getName())+",";
-		back+=ImageUrl(simulatorId, fileList[fileList.length-1].getName())+",";
+		back=ImageUrl(pathstr, fileList[0].getName())+",";
+		back+=ImageUrl(pathstr, fileList[fileList.length-1].getName())+",";
 		List<String> tempList = new LinkedList<String>();
 		for( int i=1 ;i<fileList.length-1;i++ )
 		{
-			tempList.add(ImageUrl(simulatorId , fileList[i].getName()));
+			tempList.add(ImageUrl(pathstr , fileList[i].getName()));
 		}
 		return back+=tempList.toString();
 	}
@@ -134,9 +144,10 @@ public class TrainingRecordService {
 	 * @param imageName
 	 * @return
 	 */
-	private String ImageUrl(String simulatorId , String imageName )
+	private String ImageUrl(String path , String imageName )
 	{
-		return  simulatorId+"/"+imageName;
+		String string = path+imageName ;
+		return string.replace("/Dataroot/TrainRecords/","http://www.mnjs.cn/image/");
 	}
 	/**
 	 * 保存记录文件
@@ -172,7 +183,7 @@ public class TrainingRecordService {
 		//%08s 表示最小为8位，
 		int index = simulateId.indexOf('_');
 		if ( 1 >= index) {
-			new ValueIllegalException("上传路径不合法");
+			logger.error("上传路径不合法");
 			return "";
 		}
 		String train_Unit_code = simulateId.substring(0 , index-1);

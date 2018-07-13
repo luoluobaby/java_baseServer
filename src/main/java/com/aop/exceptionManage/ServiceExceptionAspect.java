@@ -16,7 +16,7 @@ import com.exception.util.ServiceLayerException;
 public class ServiceExceptionAspect extends ExceptionAspect {
 	
 	
-	@Pointcut(value= "(execution(* com.webservice..*.*(..))) ")
+	@Pointcut(value= "(execution(* com.service..*.*(..))) ")
 	private void exceptionOperate(){};
 	
 	//@Before( value="exceptionOperate()")

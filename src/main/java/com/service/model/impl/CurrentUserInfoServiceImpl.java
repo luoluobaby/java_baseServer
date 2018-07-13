@@ -24,9 +24,8 @@ public class CurrentUserInfoServiceImpl extends BaseServiceImpl<CurrentUserInfo>
 		return addition;
 	}
 	
-	public Serializable insert(CurrentUserInfoV c) {
+	public Serializable insert(CurrentUserInfoV c , SimulatorInfo simulatorInfo) {
 		
-		SimulatorInfo simulatorInfo = simulatorInfoServiceImpl.queryByGroup(c.getTrainUnitCode(), c.getEquipmentType());
 		if (null != simulatorInfo) {
 			CurrentUserInfo curr = new CurrentUserInfo();
 			BeanUtils.copyProperties(c, curr);
@@ -35,7 +34,7 @@ public class CurrentUserInfoServiceImpl extends BaseServiceImpl<CurrentUserInfo>
 		}
 		else
 		{
-			new ValueIllegalException("没有查找到当前用户的机器，插入不成功!");
+			logger.error("没有查找到当前用户的机器，插入不成功!");
 			return null;
 		}
 	}

@@ -4,10 +4,13 @@ import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dao.BaseDaoI;
 import com.exception.constraint.ValueNullException;
+import com.service.addition.AdditionService;
 
 import java.lang.reflect.Type;
 /**
@@ -21,6 +24,8 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 	@Resource
 	protected BaseDaoI<TP> dao;
 	
+	protected Logger logger=LoggerFactory.getLogger(BaseServiceImpl.class);
+	
 	@Override
 	public void update(TP t) {
 		// TODO Auto-generated method stub
@@ -28,7 +33,7 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 			dao.update(t);
 		}
 		else {
-			new ValueNullException("更新类为空!");
+			logger.error("更新类为空!");
 		}
 	}
 
@@ -36,7 +41,7 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 	public void delete(String id) {
 		// TODO Auto-generated method stub
 		if (null==id||"".equals(id)) {
-			new ValueNullException("id为空!");
+			logger.error("id为空!");
 			return ;
 		}
 		Class <TP> entityClass = (Class<TP>)getSuperClassGenricType(getClass(), 0);
@@ -46,7 +51,7 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 			dao.delete(info);
 		}
 		else {
-			new ValueNullException("delete class is not found !");
+			logger.error("delete class is not found !");
 		}
 	}
 
@@ -70,7 +75,7 @@ public abstract class BaseServiceImpl<TP> implements ServiceI<TP>{
 		}
 		else
 		{
-			new ValueNullException("inset class is null !");
+			logger.error("inset class is null !");
 			return null;
 		}
 	}

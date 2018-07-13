@@ -5,8 +5,11 @@ import java.io.IOException;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang.ObjectUtils.Null;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.aop.exceptionManage.ServiceExceptionAspect;
 import com.exception.constraint.ValueIllegalException;
 import com.exception.constraint.ValueNullException;
 //import com.google.gson.Gson;
@@ -32,6 +35,8 @@ public class AdditionService {
 	private CurrentUserInfoServiceImpl currentUserInfoAdditionServiceImpl;
 	@Resource
 	private SimulatorInfoService simulatorInfoService;
+	
+	protected Logger logger=LoggerFactory.getLogger(AdditionService.class);
 	/**
 	 * 登陆
 	 * @param trainUnitCode 驾校编号
@@ -45,12 +50,14 @@ public class AdditionService {
 		String strback = "";
 		//类构造不成功
 		if (null==inputAdditionV) {
-			new ValueNullException("currentUserInfoV=null");
 			strback = BackString(false,99,"通讯凭证错误");
+			logger.error("currentUserInfoV=null,pass="+password);
+			//throw new ValueNullException("currentUserInfoV=null,pass="+password);
 			return strback ;
 		}
 		//判断登陆的用户名和密码是否错误
 		if (false == CheckPasswd(userCode, password)) {
+			logger.error("pass="+password);
 			strback = BackString(false,99,"通讯凭证错误");
 		}
 		else
@@ -72,6 +79,7 @@ public class AdditionService {
 						inputAdditionV.getTrainUnitCode(), inputAdditionV.getEquipmentType() , (short)0);
 				if(null==simulatorInfo)
 				{
+					logger.error("没有查找到机器,train="+inputAdditionV.getTrainUnitCode()+",type="+inputAdditionV.getEquipmentType());
 					strback = BackString(false,1,"查询无此模拟器");
 				}
 			}
@@ -80,7 +88,7 @@ public class AdditionService {
 				Machines machines = Machines.GetMachine(simulatorInfo.getEquipmentId());
 				if (null == machines) {
 					//发生错误
-					new ValueNullException("机器socket出现问题");
+					logger.error("机器socket出现问题");
 					strback = BackString(false,1,"查询无此模拟器");
 				}
 				else
@@ -91,10 +99,13 @@ public class AdditionService {
 					inputAdditionV.setStat((byte)0);
 					//将当前用户信息插入到对应的表中
 					if (null == key) {
-						key= (String) currentUserInfoAdditionServiceImpl.insert(inputAdditionV);
+						key= (String) currentUserInfoAdditionServiceImpl.insert(inputAdditionV , simulatorInfo);
 					}
 					if(null==key||"".equals(key))
+					{
+						logger.error("机器socket出现问题key is null,pass="+password);
 						strback = BackString(false,99,"通讯凭证错误");
+					}
 					else
 					{
 						//改变模拟器的状态
@@ -104,6 +115,7 @@ public class AdditionService {
 						strback = BackString(true,0,"模拟器登入成功!编号："+simulatorInfo.getEquipmentCode());
 						//发送信息到该台模拟器。表明当前有用户登陆进来。
 						if (false == SendLoginInMessage(inputAdditionV, machines)) {
+							logger.error("发送消息失败");
 							strback = BackString(false,99,"查询无此模拟器");
 						}
 					}		
@@ -126,7 +138,7 @@ public class AdditionService {
 			b = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			new ValueIllegalException("机器socket出现问题");
+			logger.error("机器socket出现问题");
 		}
 		return b;
 	}
@@ -156,9 +168,13 @@ public class AdditionService {
 			//查找数据当前在线的人
 			CurrentUserInfo currUser=currentUserInfoAdditionServiceImpl.queryByKey(simulatorId);
 			if(null==currUser)
+			{
 				strback = BackString(false,1,"模拟器编号或流水号出错");
+				return strback;
+			}
 
 			if (null==currUser.getSimulatorInfo() || (short)0==currUser.getSimulatorInfo().getStat()) {
+				
 				strback = BackString(false,2,"模拟器并未处于使用状态");
 			}
 			else
@@ -170,7 +186,8 @@ public class AdditionService {
 						machines.sendMessage(new SocketSendTextFormat<String>(SocketConstSendTextType.LoginOut,"Login out").toString());
 						strback = BackString(true,0,"模拟器登退成功");
 					} catch (IOException e) {
-						new ValueIllegalException("发送数据到机器端失败");
+
+						logger.error("发送数据到机器端失败");
 						strback = BackString(true,0,"模拟器并未处于使用状态");
 					}
 				}
@@ -211,7 +228,7 @@ public class AdditionService {
 		else
 		{
 			//抛出异常
-			new ValueIllegalException("密码错误");
+			logger.error("密码错误");
 			return false;
 		}			
 	}

@@ -89,9 +89,9 @@ public class Machines {
 		}
 		System.out.println("open "+machine);
 		IsExistAndRemoveCurr(this);
-		//说明当前机器已经上线，等待用户打卡签到
+		//将当前机器加入到列表中
 		Machines.getHeartSet().add(this);
-		//开机判断当前是否还有用户占用该机器，则应该让用户继续占用
+		//根据登录的机器序列号从当前用户信息表中查找相应的数据信息
 		CurrentUserInfo info= null; 
 		if (null != getAddtionService()) {
 			info = getAddtionService().queryByEquipmentId(machineChip);

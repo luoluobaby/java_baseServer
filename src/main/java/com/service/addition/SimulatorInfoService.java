@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dao.BaseDaoI;
@@ -29,6 +31,8 @@ public class SimulatorInfoService {
 	private DriveTrainCompanyInfoServiceImpl trainCompanyInfoAdditionServiceImpl;
 	@Resource
 	private BaseDaoI<SimulatorInfo> baseDaoI;
+	
+	protected Logger logger=LoggerFactory.getLogger(SimulatorInfoService.class);
 	
 	public SimulatorInfo queryByKey(String id) {
 		return simulatorInfoAdditionServiceImpl.queryByKey(id);
@@ -57,7 +61,7 @@ public class SimulatorInfoService {
 		//查找当前要注册的驾校编号
 		DriveTrainCompanyInfo companyInfo = trainCompanyInfoAdditionServiceImpl.queryByCompanyName(companyName);
 		if (null == companyInfo ||( null != simulatorInfo &&false == companyInfo.getTrainUnitCode().equals(simulatorInfo.getDriveTrainCompanyInfo().getTrainUnitCode())) ) {
-			new ValueIllegalException("公司名称输入错误");
+			logger.error("公司名称输入错误");
 			return false;
 		}
 		if (simulatorInfo != null) {
