@@ -184,6 +184,7 @@ public class AdditionService {
 				if (null != machines) {
 					try {
 						machines.sendMessage(new SocketSendTextFormat<String>(SocketConstSendTextType.LoginOut,"Login out").toString());
+						deleteUserAndReleaseSimulator(simulatorId);
 						strback = BackString(true,0,"模拟器登退成功");
 					} catch (IOException e) {
 

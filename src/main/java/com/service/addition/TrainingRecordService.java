@@ -39,18 +39,18 @@ public class TrainingRecordService {
 	 * @param imageData 保存的图片
 	 * @return
 	 */
-	public boolean SaveImage(String userCode ,String password, String simulatorId , byte[] imageData)
+	public boolean SaveImage(String userCode ,String password, String simulatorId , byte[] imageData , String name)
 	{
 		
 		boolean b = additionService.CheckPasswdByMySelf(userCode, password);
-		if (true == b) {
+		if (true == b && imageData != null && 0 < imageData.length && null != name && !"".equals(name)) {
 			String path  = CaculatePath(simulatorId);
 			//图片保存名字
-			Date currentTime = new Date();
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-			String dateString = formatter.format(currentTime);
-			String filaname =dateString+".png";
-			SaveOneImage(path,filaname,imageData);
+//			Date currentTime = new Date();
+//			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+//			String dateString = formatter.format(currentTime);
+//			String filaname =dateString+".png";
+			SaveOneImage(path,name,imageData);
 		}		
 		return b;
 	}
@@ -85,10 +85,6 @@ public class TrainingRecordService {
 			}
 			TrainingRecords tempRecord = trainingRecordsServiceImpl.queryByKey(realSimulateId);
 			b = (null!=tempRecord && tempRecord.getContent().equals(record.getContent()));
-			if (true == b) {
-				//删除当前在训练的记录
-				additionService.deleteUserAndReleaseSimulator(simulatorId);
-			}
 		}
 		return b;
 	}

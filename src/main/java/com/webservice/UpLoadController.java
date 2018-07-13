@@ -17,8 +17,11 @@ public interface UpLoadController {
 	 * @param imageContent
 	 * @return
 	 */
-	public boolean UpLoadImage(String username , String password, String simulatorId ,byte[] imageContent);
-
+	public boolean UpLoadImage(String username , String password, String simulatorId ,byte[] imageContent , String name );
+	
+	
+	public boolean UpLoadTwoImage(String username , String password , String simulatorId , byte[] imageContent , String name , byte[] imageContent1 ,String name1) ;
+	
 	/**
 	 * 注册一台机器
 	 * @param chipId 机器的电路板号
