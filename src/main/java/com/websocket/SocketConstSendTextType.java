@@ -19,5 +19,10 @@ public class SocketConstSendTextType {
 	 */
 	public final static int NoFindMachine=3;
 	
+	/**
+	 * 心跳包
+	 */
+	public final static int Heart = 4 ;
+	
 	
 }

@@ -3,34 +3,33 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:p="http://www.springframework.org/schema/p"    
-	xmlns:tx="http://www.springframework.org/schema/tx"	
+    xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
     xmlns:jaxws="http://cxf.apache.org/jaxws"
 	xmlns:aop="http://www.springframework.org/schema/aop"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context-4.1.xsd
         http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
         http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
-        ">                    
+        ">
     <!-- spring扫描的包 -->
     <context:component-scan base-package="com.service"></context:component-scan>
     <context:component-scan base-package="com.dao"></context:component-scan>
     <context:component-scan base-package="com.util"></context:component-scan>
     <context:component-scan base-package="com.controller"></context:component-scan>
     <context:component-scan base-package="com.aop"></context:component-scan>
-    <context:component-scan base-package="com.webservice.impl"></context:component-scan>
 	<context:property-placeholder location="classpath:config.properties"/>
     <!-- DispatcherServlet不处理静态资源,交给服务器默认的servlet处理 -->
     <mvc:default-servlet-handler />
     <!-- 启用annotation -->
     <mvc:annotation-driven />
-    
+
     <!-- 视图渲染器 -->
-    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" 
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
             id="internalResourceViewResolver">
         <!-- 前缀 -->
         <property name="prefix" value="/jsp/" />
@@ -62,47 +61,54 @@
           p:maxActive="500"
           p:maxIdle="100"
           p:minIdle="50"/>
-    
+
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" lazy-init="false">
     	<property name="dataSource" ref="dataSource"></property>
     	<property name="hibernateProperties">
     		<props>
-    			<!-- <prop key="hibernate.dialect">${hibernate.dialect}</prop> -->
     			<prop key="hibernate.autoReconnect">${hibernate.autoReconnect}</prop>
     		</props>
     	</property>
-    	<property name="configLocation" value="classpath:hibernate.cfg.xml"></property>
-    	
+        <property name="configLocation"
+                  value="classpath:hibernate.cfg.xml">
+        </property>
     </bean>
-    
+
    <!--  配置spring 申明事务 -->
     <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
     	<property name="sessionFactory" ref="sessionFactory"></property>
     </bean>
-        
-    <bean id="applicationContextUtil" class="com.service.util.ApplicationContextUtil"></bean> 
-        
+
+    <bean id="applicationContextUtil" class="com.service.util.ApplicationContextUtil"></bean>
+
      <!-- 配置事务属性 -->
     <tx:advice id="txAdvice" transaction-manager="transactionManager">
-    	<tx:attributes>
-    		<tx:method name="*get*" read-only="true" />
-    		<tx:method name="*query*" read-only="true"/>
-    		<tx:method name="*"/>
-    	</tx:attributes>
+        <tx:attributes>
+            <tx:method name="*get*" read-only="true" />
+            <tx:method name="*query*" read-only="true"/>
+            <tx:method name="*update*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+            <tx:method name="*insert*" read-only="false" propagation="REQUIRED"  />
+            <tx:method name="*register*" read-only="false" propagation="REQUIRED"  />
+            <tx:method name="*"/>
+        </tx:attributes>
     </tx:advice>
-    
+
     <!-- 启用事务注解 -->
     <tx:annotation-driven transaction-manager="transactionManager"/>
-    
-    
+
     <!-- 通知spring使用cglib而不是jdk的来生成代理方法 -->
     <aop:aspectj-autoproxy proxy-target-class="true" />
-    
-    
+
+
     <!-- 配置事务切点，并把切点和事务属性关联起来 -->
     <aop:config>
     	<aop:pointcut expression="execution(* com.service..*.*(..))" id="txPointcut"/>
-    	<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>    	
+    	<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>
     </aop:config>
-    
+
+    <mvc:interceptors>
+        <bean class="org.springframework.orm.hibernate4.support.OpenSessionInViewInterceptor">
+            <property name="sessionFactory" ref="sessionFactory"/>
+        </bean>
+    </mvc:interceptors>
 </beans>

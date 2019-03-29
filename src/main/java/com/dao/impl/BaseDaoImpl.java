@@ -1,185 +1,145 @@
 package com.dao.impl;
 
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.stereotype.Repository;
+
+import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.transaction.Transactional;
 
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+/**
+ * @author JimmyBlue
+ * @date 2018/3/3 0003 9:55
+ * 实现基于泛型的基本CRUD操作实现类
+ *
+ * @param <T>
+ * @param <PK>
+ */
+@Repository
+public class BaseDaoImpl<T, PK extends Serializable> implements com.dao.BaseDao<T, PK> {
+    /**
+     * 构造方法，依据实例类自己主动获取实体类类型
+     */
+    @SuppressWarnings("unchecked")
+    public BaseDaoImpl() {
+    }
 
-import com.dao.BaseDaoI;
+    @Resource
+    private SessionFactory sessionFactory;
+
+    private Session getSession() {
+        return sessionFactory.getCurrentSession();
+    }
 
 
+    /**
+     * 依据主键获取实体。假设没有对应的实体，返回null
+     *
+     * @param id id
+     * @return 返回
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public T get(PK id , Class<T> c) {
+        return (T) this.getSession().get(c, id);
+    }
 
-@Repository("baseDaoImpl")
-public class BaseDaoImpl<T> implements BaseDaoI<T> {
 
-	private SessionFactory sessionFactory;
+    // 依据主键获取实体。假设没有对应的实体，抛出异常。
+    @Override
+    @SuppressWarnings("unchecked")
+    public T load(PK id, Class<T> c) {
+        return (T) this.getSession().load(c, id);
+    }
 
-	public SessionFactory getSessionFactory() {
-		return sessionFactory;
-	}
+    /**
+     * 更新实体
+     * 使用merge替代update，避免出现 托管态update更新异常
+     * @param entity 实体
+     */
+    @Override
+    public  void update(T entity) {
+        this.getSession().merge(entity);
+    }
 
-	@Autowired
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
-	}
 
-	private Session getCurrentSession() {
-		return sessionFactory.getCurrentSession();
-	}
+    /**
+     * 创建实体，返回主键
+     * @param entity 实体
+     * @return 返回
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public PK save(T entity) {
+        Serializable result  =  this.getSession().save(entity);
+        return (PK) result;
+    }
 
-	public Serializable save(T o) {
-		return this.getCurrentSession().save(o);
-	}
 
-	public void delete(T o) {
-		this.getCurrentSession().delete(o);
-	}
-	public void update(T o) {
-		this.getCurrentSession().update(o);
-	}
+    /**
+     * 添加或更新实体
+     *
+     * @param entity 实体
+     */
+    @Override
+    public void saveOrUpdate(T entity) {
+        this.getSession().saveOrUpdate(entity);
+}
 
-	public void saveOrUpdate(T o) {
-		this.getCurrentSession().saveOrUpdate(o);
-	}
 
-	public List<T> find(String hql) {
-		return this.getCurrentSession().createQuery(hql).list();
-	}
-	
-	public List findSQL(String hql, Class T) {
-		return this.getCurrentSession().createSQLQuery(hql).addEntity(T).list();
-	}
-	
-	public List findSQL(String hql) {
-		return this.getCurrentSession().createSQLQuery(hql).list();
-	}
+    /**
+     * 删除指定的实体
+     *
+     * @param entity 实体
+     */
+    @Override
+    public void delete(T entity) {
+        this.getSession().delete(entity);
+    }
 
-	public List<T> find(String hql, Object[] param) {
-		Query q = this.getCurrentSession().createQuery(hql);
-		if (param != null && param.length > 0) {
-			for (int i = 0; i < param.length; i++) {
-				q.setParameter(i, param[i]);
-			}
-		}
-		return q.list();
-	}
 
-	public List<T> find(String hql, List<Object> param) {
-		Query q = this.getCurrentSession().createQuery(hql);
-		if (param != null && param.size() > 0) {
-			for (int i = 0; i < param.size(); i++) {
-				q.setParameter(i, param.get(i));
-			}
-		}
-		return q.list();
-	}
+    /**
+     * 依据主键删除指定实体
+     *
+     * @param id id
+     */
+    @Override
+    public void delete(PK id , Class<T> c) {
+        this.delete(this.load(id,c));
+    }
 
-	public List<T> find(String hql, Object[] param, Integer page, Integer rows) {
-		if (page == null || page < 1) {
-			page = 1;
-		}
-		if (rows == null || rows < 1) {
-			rows = 10;
-		}
-		Query q = this.getCurrentSession().createQuery(hql);
-		if (param != null && param.length > 0) {
-			for (int i = 0; i < param.length; i++) {
-				q.setParameter(i, param[i]);
-			}
-		}
-		return q.setFirstResult((page - 1) * rows).setMaxResults(rows).list();
-	}
+    /**
+     * 查询所有
+     *
+     * @return 返回
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<T> findAll(Class<T> c) {
+        return this.getSession().createCriteria(c).list();
+    }
 
-	public List<T> find(String hql, List<Object> param, Integer page, Integer rows) {
-		if (page == null || page < 1) {
-			page = 1;
-		}
-		if (rows == null || rows < 1) {
-			rows = 10;
-		}
-		Query q = this.getCurrentSession().createQuery(hql);
-		if (param != null && param.size() > 0) {
-			for (int i = 0; i < param.size(); i++) {
-				q.setParameter(i, param.get(i));
-			}
-		}
-		return q.setFirstResult((page - 1) * rows).setMaxResults(rows).list();
-	}
+    /**
+     * 批量删除
+     *
+     * @param ids ids
+     */
+    @Override
+    public void delete(PK[] ids , Class<T> c) {
+        Session session = this.getSession();
+        //数组中封装的是ID的集合;
+        for(int i=0; i<ids.length; i++) {
+            delete(ids[i] ,c);
+        }
+    }
 
-	public T get(Class<T> c, Serializable id) {
-		return (T) this.getCurrentSession().get(c, id);
-	}
-
-	public T get(String hql, Object[] param) {
-		List<T> l = this.find(hql, param);
-		if (l != null && l.size() > 0) {
-			return l.get(0);
-		} else {
-			return null;
-		}
-	}
-
-	public T get(String hql, List<Object> param) {
-		List<T> l = this.find(hql, param);
-		if (l != null && l.size() > 0) {
-			return l.get(0);
-		} else {
-			return null;
-		}
-	}
-
-	public Long count(String hql) {
-		return (Long) this.getCurrentSession().createQuery(hql).uniqueResult();
-	}
-
-	public Long count(String hql, Object[] param) {
-		Query q = this.getCurrentSession().createQuery(hql);
-		if (param != null && param.length > 0) {
-			for (int i = 0; i < param.length; i++) {
-				q.setParameter(i, param[i]);
-			}
-		}
-		return (Long) q.uniqueResult();
-	}
-
-	public Long count(String hql, List<Object> param) {
-		Query q = this.getCurrentSession().createQuery(hql);
-		if (param != null && param.size() > 0) {
-			for (int i = 0; i < param.size(); i++) {
-				q.setParameter(i, param.get(i));
-			}
-		}
-		return (Long) q.uniqueResult();
-	}
-
-	public Integer executeHql(String hql) {
-		return this.getCurrentSession().createQuery(hql).executeUpdate();
-	}
-
-	public Integer executeHql(String hql, Object[] param) {
-		Query q = this.getCurrentSession().createQuery(hql);
-		if (param != null && param.length > 0) {
-			for (int i = 0; i < param.length; i++) {
-				q.setParameter(i, param[i]);
-			}
-		}
-		return q.executeUpdate();
-	}
-
-	public Integer executeHql(String hql, List<Object> param) {
-		Query q = this.getCurrentSession().createQuery(hql);
-		if (param != null && param.size() > 0) {
-			for (int i = 0; i < param.size(); i++) {
-				q.setParameter(i, param.get(i));
-			}
-		}
-		return q.executeUpdate();
-	}
+    @Override
+    public void deleteAll(String entityName) {
+        String hql = "Delete FROM "+ entityName;
+        this.getSession().createQuery(hql) ;
+    }
 
 }
